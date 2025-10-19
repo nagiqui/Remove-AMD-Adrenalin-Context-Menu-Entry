@@ -63,24 +63,24 @@ try {
     exit 1
 }
 
-# Wait before re-registering
-Write-Host "'re-registering' the package restores system functions like 'Open in Terminal' and other context menu items." -ForegroundColor DarkCyan
+# Wait before "re-registering"
+Write-Host "''re-registering'' the package restores system functions like 'Open in Terminal' and other context menu items." -ForegroundColor DarkCyan
 
 Start-Sleep -Seconds 4
 
-# Re register package
-Write-Host "`n--- Re-registering package ---" -ForegroundColor Yellow
+# "Re-register package"
+Write-Host "`n--- ''Re-registering'' package ---" -ForegroundColor Yellow
 try {
-    # Re-register using the manifest file from the original install location
+    # "Re-register" using the manifest file from the original install location
     Add-AppxPackage -Register "$($package.InstallLocation)\AppxManifest.xml" -DisableDevelopmentMode -ErrorAction Stop
     Start-Sleep -Seconds 2
 
     # Verify re-addition
     $checkAdd = Get-AppxPackage | Where-Object {$_.Name -match $targetPackageFragment}
     if ($checkAdd) {
-        Write-Host "Package re-registered successfully." -ForegroundColor Green
+        Write-Host "Package ''re-registered'' successfully." -ForegroundColor Green
     } else {
-        Write-Host "Verification failed: Package is missing after re-registration attempt." -ForegroundColor Red
+        Write-Host "Verification failed: Package is missing after ''re-registration'' attempt." -ForegroundColor Red
     }
 } catch {
     Write-Host "Critical Error during package registration: $($_.Exception.Message)" -ForegroundColor Red
@@ -94,3 +94,4 @@ Write-Host "If the changes don't appear immediately, please restart Windows Expl
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "Press any key to exit..." -ForegroundColor DarkCyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
