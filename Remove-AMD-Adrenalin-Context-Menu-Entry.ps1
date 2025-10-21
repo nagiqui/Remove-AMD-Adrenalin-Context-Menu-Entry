@@ -4,13 +4,18 @@
 $targetPackageFragment = "AdvancedMicroDevicesInc-RSXCM"
 $restorePointName = "AMD_CM_Reset_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
 
+function Pause-Script {
+    Write-Host "`nPress any key to exit..." -ForegroundColor DarkCyan
+    Read-Host | Out-Null
+}
+
 # 1. Check for administrator privileges
 $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = [Security.Principal.WindowsPrincipal]$currentUser
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "This script must be run as Administrator." -ForegroundColor Red
-
-    exit 1
+    Pause-Script
+    exit
 }
 
 Write-Host "`n=== Remove AMD Adrenaline Context Menu Entry ===`n" -ForegroundColor Cyan
@@ -39,7 +44,8 @@ $package = Get-AppxPackage | Where-Object {$_.Name -match $targetPackageFragment
 if (-not $package) {
     Write-Host "`nError: No package matching '$targetPackageFragment' was found." -ForegroundColor Red
     Write-Host "The AMD Context Menu component may not be installed or the name has changed." -ForegroundColor Red
-    exit 1
+    Pause-Script
+    exit
 } else {
     Write-Host "Package found: $($package.Name) - Version: $($package.Version)" -ForegroundColor Green
 }
@@ -56,22 +62,23 @@ try {
         Write-Host "Package removed successfully." -ForegroundColor Green
     } else {
         Write-Host "Verification failed: Package is still present after removal attempt." -ForegroundColor Red
-        exit 1
+        Pause-Script
+        exit
     }
 } catch {
     Write-Host "Critical Error during package removal: $($_.Exception.Message)" -ForegroundColor Red
-    exit 1
+    Pause-Script
+    exit
 }
 
 # Wait before "re-registering"
 Write-Host "''re-registering'' the package restores system functions like 'Open in Terminal' and other context menu items." -ForegroundColor DarkCyan
-
 Start-Sleep -Seconds 4
 
 # "Re-register package"
 Write-Host "`n--- ''Re-registering'' package ---" -ForegroundColor Yellow
 try {
-    # "Re-register" using the manifest file from the original install location
+# "Re-register" using the manifest file from the original install location
     Add-AppxPackage -Register "$($package.InstallLocation)\AppxManifest.xml" -DisableDevelopmentMode -ErrorAction Stop
     Start-Sleep -Seconds 2
 
@@ -84,14 +91,14 @@ try {
     }
 } catch {
     Write-Host "Critical Error during package registration: $($_.Exception.Message)" -ForegroundColor Red
+    Pause-Script
+    exit
 }
 
 Write-Host "`n=========================================" -ForegroundColor Cyan
 Write-Host "Operation completed. The AMD Context Menu should now be reset." -ForegroundColor Cyan
 Write-Host "If the changes don't appear immediately, please restart Windows Explorer or log out and log back in." -ForegroundColor DarkYellow
-        Write-Host " -Option 1: Open Task Manager (CTRL + SHIFT + ESC) > Run new task > type 'explorer.exe' > press Enter."
-        Write-Host " -Option 2: Press Win + R > type 'explorer.exe' > press Enter."
+Write-Host " -Option 1: Open Task Manager (CTRL + SHIFT + ESC) > Run new task > type 'explorer.exe' > press Enter."
+Write-Host " -Option 2: Press Win + R > type 'explorer.exe' > press Enter."
 Write-Host "=========================================" -ForegroundColor Cyan
-Write-Host "Press any key to exit..." -ForegroundColor DarkCyan
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-
+Pause-Script
